@@ -1,85 +1,65 @@
-import { useState } from "react";
-import FoodCard from "../components/FoodCard";
-import ModalTopping from "../components/ModalTopping";
+import React from "react";
+import { Container, Row, Col, Card, Button } from "react-bootstrap";
 
-export default function MenuPage() {
-  const foods = [
-    {
-      id: 1,
-      name: "Eskrim",
-      price: 12000,
-      image: "/eskrim.jpg",
-      description: "Eskrim lembut manis.",
-      options: ["Oreo", "Mesis"],
-    },
-    {
-      id: 2,
-      name: "Mie",
-      price: 15000,
-      image: "/mie.jpg",
-      description: "Mie dengan berbagai rasa.",
-      options: ["Goreng", "Aceh", "Rendang"],
-    },
-    {
-      id: 3,
-      name: "Bento",
-      price: 25000,
-      image: "/bento.jpg",
-      description: "Bento spesial.",
-      options: ["Keju", "Lada Hitam", "Hot Lava"],
-    },
-    {
-      id: 4,
-      name: "Plecing Kangkung",
-      price: 10000,
-      image: "/plecing.jpg",
-      description: "Plecing pedas segar.",
-      options: [],
-    },
-  ];
+const foods = [
+  {
+    id: "eskrim",
+    name: "Eskrim",
+    description: "Eskrim lembut manis.",
+    price: 12000,
+    img: "/assets/eskrim.jpg",
+    options: ["Oreo", "Mesis"],
+  },
+  {
+    id: "mie",
+    name: "Mie",
+    description: "Mie dengan berbagai rasa.",
+    price: 15000,
+    img: "/assets/mie.jpg",
+    options: ["Goreng", "Aceh", "Rendang"],
+  },
+  {
+    id: "bento",
+    name: "Bento",
+    description: "Bento spesial.",
+    price: 25000,
+    img: "/assets/bento.jpg",
+    options: ["Keju", "Lada Hitam", "Hot Lava"],
+  },
+  {
+    id: "plecing",
+    name: "Plecing Kangkung",
+    description: "Plecing pedas segar.",
+    price: 10000,
+    img: "/assets/plecing.jpg",
+    options: null,
+  },
+];
 
-  const [selectedFood, setSelectedFood] = useState(null);
-  const [showModal, setShowModal] = useState(false);
-
-  const addFood = (food) => {
-    if (food.options.length === 0) {
-      // langsung ke keranjang (plecing)
-      const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-      cart.push({ ...food, option: null });
-      localStorage.setItem("cart", JSON.stringify(cart));
-      alert("Ditambahkan ke keranjang!");
-    } else {
-      setSelectedFood(food);
-      setShowModal(true);
-    }
-  };
-
-  const confirmAdd = (option) => {
-    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    cart.push({ ...selectedFood, option });
-    localStorage.setItem("cart", JSON.stringify(cart));
-    setShowModal(false);
-    alert("Ditambahkan ke keranjang!");
-  };
-
+export default function MenuPage({ onAdd, onBuyNow }) {
   return (
-    <div className="container mt-4">
-      <h2>Menu Makanan</h2>
-
-      <div className="row mt-3">
-        {foods.map((f) => (
-          <div className="col-md-4" key={f.id}>
-            <FoodCard food={f} onAdd={addFood} />
-          </div>
+    <Container className="mt-4">
+      <h1 className="text-center mb-4">Menu Makanan</h1>
+      <Row className="g-4">
+        {foods.map((food) => (
+          <Col key={food.id} md={6} lg={3}>
+            <Card className="h-100 shadow-sm">
+              <Card.Img variant="top" src={food.img} style={{ height: 190, objectFit: "cover" }} />
+              <Card.Body className="d-flex flex-column">
+                <Card.Title>{food.name}</Card.Title>
+                <Card.Text className="text-muted small">{food.description}</Card.Text>
+                <div className="mt-auto">
+                  <div className="fw-bold mb-2">Rp {food.price.toLocaleString()}</div>
+                  <div className="d-grid gap-2">
+                    <Button variant="primary" onClick={() => onAdd(food)}>Tambah ke Keranjang</Button>
+                    <Button variant="success" onClick={() => onBuyNow(food)}>Beli Langsung</Button>
+                  </div>
+                </div>
+              </Card.Body>
+            </Card>
+          </Col>
         ))}
-      </div>
-
-      <ModalTopping
-        show={showModal}
-        onHide={() => setShowModal(false)}
-        food={selectedFood}
-        onConfirm={confirmAdd}
-      />
-    </div>
+      </Row>
+    </Container>
   );
 }

@@ -1,44 +1,37 @@
-import { useEffect, useState } from "react";
-import QRISModal from "../components/QRISModal";
-import api from "../api";
+import React from "react";
+import { Container, Card, Button } from "react-bootstrap";
+import { Link } from "react-router-dom";
 
-export default function CheckoutPage() {
-  const [cart, setCart] = useState([]);
-  const [showQRIS, setShowQRIS] = useState(false);
-
-  useEffect(() => {
-    setCart(JSON.parse(localStorage.getItem("cart") || "[]"));
-  }, []);
-
-  const sendOrder = async () => {
-    await api.post("/order", { items: cart });
-
-    new Audio("/success.mp3").play(); // audio beli
-
-    setShowQRIS(true);
-  };
+export default function CartPage({ cart, removeFromCart }) {
+  const total = cart.reduce((sum, item) => sum + item.price, 0);
 
   return (
-    <div className="container mt-4">
-      <h3>Checkout</h3>
+    <Container className="mt-4">
+      <h2 className="fw-bold mb-3">Keranjang</h2>
 
-      {cart.map((c, i) => (
-        <div key={i} className="border p-2 mb-2 rounded">
-          <strong>{c.name}</strong> — {c.option || "-"}  
-          <br />
-          Rp {c.price}
-        </div>
-      ))}
+      {cart.length === 0 ? (
+        <p>Keranjang kosong.</p>
+      ) : (
+        cart.map((item, index) => (
+          <Card key={index} className="p-3 mb-2 shadow-sm">
+            <h5>{item.name}</h5>
+            <p>Rp {item.price.toLocaleString()}</p>
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => removeFromCart(index)}
+            >
+              Hapus
+            </Button>
+          </Card>
+        ))
+      )}
 
-      <button className="btn btn-success" onClick={sendOrder}>
-        Kirim Pesanan
-      </button>
+      <h3 className="mt-3 fw-bold">Total: Rp {total.toLocaleString()}</h3>
 
-      <QRISModal show={showQRIS} onHide={() => {
-        setShowQRIS(false);
-        localStorage.removeItem("cart");
-        window.location.href = "/";
-      }} />
-    </div>
+      <Button as={Link} to="/checkout" variant="success" className="mt-3">
+        Checkout
+      </Button>
+    </Container>
   );
 }
