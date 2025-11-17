@@ -1,36 +1,36 @@
 import fs from "fs";
 import path from "path";
 
-export default function handler(req, res) {
+export default async function handler(req, res) {
+  // CORS
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
+  // Untuk preflight
   if (req.method === "OPTIONS") {
     return res.status(200).end();
   }
 
-  const file = path.join(process.cwd(), "orders.json");
+  // Hanya support POST
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
 
-  const safeRead = () => {
-    try {
-      if (!fs.existsSync(file)) return [];
-      const text = fs.readFileSync(file, "utf8").trim();
-      if (!text) return [];
-      return JSON.parse(text);
-    } catch {
-      return [];
+  try {
+    // HARUS diparse manual, karena req.body masih berupa string mentah!
+    const rawBody =
+      typeof req.body === "string" ? req.body : JSON.stringify(req.body);
+
+    const cart = JSON.parse(rawBody);
+
+    const filePath = path.join(process.cwd(), "orders.json");
+
+    let orders = [];
+    if (fs.existsSync(filePath)) {
+      const text = fs.readFileSync(filePath, "utf8") || "[]";
+      orders = JSON.parse(text);
     }
-  };
-
-  const safeWrite = (data) => {
-    fs.writeFileSync(file, JSON.stringify(data, null, 2), "utf8");
-  };
-
-  if (req.method === "POST") {
-    const cart = req.body;
-
-    const orders = safeRead();
 
     const newOrder = {
       items: cart,
@@ -39,13 +39,15 @@ export default function handler(req, res) {
     };
 
     orders.push(newOrder);
-    safeWrite(orders);
+
+    fs.writeFileSync(filePath, JSON.stringify(orders, null, 2), "utf8");
 
     return res.status(200).json({
       message: "Order received",
       order: newOrder,
     });
+  } catch (err) {
+    console.error("ORDER ERROR:", err);
+    return res.status(500).json({ error: "Internal server error" });
   }
-
-  return res.status(405).json({ error: "Method not allowed" });
 }

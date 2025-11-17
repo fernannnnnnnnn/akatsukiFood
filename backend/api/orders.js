@@ -10,18 +10,23 @@ export default function handler(req, res) {
     return res.status(200).end();
   }
 
-  const file = path.join(process.cwd(), "orders.json");
+  if (req.method !== "GET") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
 
   try {
-    if (!fs.existsSync(file)) {
+    const filePath = path.join(process.cwd(), "orders.json");
+
+    if (!fs.existsSync(filePath)) {
       return res.json([]);
     }
 
-    const text = fs.readFileSync(file, "utf8").trim();
-    const data = text ? JSON.parse(text) : [];
+    const text = fs.readFileSync(filePath, "utf8") || "[]";
+    const orders = JSON.parse(text);
 
-    return res.json(data);
+    return res.json(orders);
   } catch (err) {
-    return res.status(500).json({ error: "Failed to read file" });
+    console.error("READ ERROR:", err);
+    return res.status(500).json({ error: "Internal server error" });
   }
 }
