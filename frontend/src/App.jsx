@@ -35,33 +35,34 @@ function HomePage() {
   const foods = [
     {
       id: 1,
-      name: "Es Krim",
-      price: 5000,
-      extras: ["Oreo", "Mesis"],
+      name: "Dimsum",
+      price: 13000,
+      extras: ["Isi 6"],
     },
     {
       id: 2,
+      name: "Bento",
+      price: 13000,
+      extras: ["Katsu", "Teriyaki", "Lada Hitam", "Hot Lava", "Saus Keju", "Asam Manis"],
+    },
+    {
+      id: 3,
       name: "Mie",
       price: 6000,
       extras: ["Goreng", "Aceh", "Rendang"],
     },
-    {
-      id: 3,
-      name: "Bento",
-      price: 13000,
-      extras: ["Lada Hitam", "Aceh", "Rendang"],
-    },
-    {
-      id: 4,
-      name: "Plecing Kangkung",
-      price: 10000,
-      extras: ["Goreng", "Aceh", "Rendang"],
-    },
+    
+    // {
+    //   id: 4,
+    //   name: "Plecing Kangkung",
+    //   price: 10000,
+    //   extras: ["Goreng", "Aceh", "Rendang"],
+    // },
   ];
 
   const addToCart = (food) => {
     if (!selectedExtra) {
-      showError("Pilih topping/rasa dulu!");
+      showError("Pilih varian dulu!");
       return;
     }
 
@@ -206,7 +207,7 @@ function HomePage() {
                     className="form-select mb-2"
                     onChange={(e) => setSelectedExtra(e.target.value)}
                   >
-                    <option value="">Pilih topping/rasa</option>
+                    <option value="">Pilih varian</option>
                     {food.extras.map((ex, i) => (
                       <option key={i} value={ex}>
                         {ex}
