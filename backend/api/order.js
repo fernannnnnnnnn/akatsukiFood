@@ -13,14 +13,25 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Data dari frontend
-    const { item, price, toppings, quantity } = req.body;
+    // FIX BODY PARSE UNTUK VERCEL SERVERLESS
+    let body = "";
+
+    await new Promise((resolve) => {
+      req.on("data", (chunk) => {
+        body += chunk;
+      });
+
+      req.on("end", resolve);
+    });
+
+    const data = JSON.parse(body || "{}");
+
+    const { item, price, toppings, quantity } = data;
 
     if (!item || !price) {
-      return res.status(400).json({ error: "Bad request: missing data" });
+      return res.status(400).json({ error: "Bad request: Missing required fields" });
     }
 
-    // Simulasi penyimpanan order (tanpa DB)
     const order = {
       id: Date.now(),
       item,
@@ -36,7 +47,7 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error("Order error:", error);
+    console.error("Order Error:", error);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 }
