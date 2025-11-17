@@ -52,6 +52,3 @@ app.get("/orders", (req, res) => {
   const orders = safeReadJSON("orders.json"); // Gunakan fungsi yang aman
   res.json(orders);
 });
-
-// --- MENJALANKAN SERVER (HANYA SATU INI) ---
-app.listen(5000, () => console.log("Backend running on port 5000"));

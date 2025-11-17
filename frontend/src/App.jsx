@@ -97,7 +97,7 @@ function HomePage() {
 
   const sendOrderAndShowQRIS = async () => {
     try {
-      const res = await fetch("http://localhost:5000/order", {
+      const res = await fetch("https://akatsuki-food-backend.vercel.app/api/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(cart),
@@ -134,7 +134,7 @@ function HomePage() {
     };
 
     try {
-      const res = await fetch("http://localhost:5000/order", {
+      const res = await fetch("https://akatsuki-food-backend.vercel.app/api/order", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify([item]), // kirim sebagai array 1 item

@@ -5,7 +5,7 @@ export default function AdminPage() {
   const [statsToday, setStatsToday] = useState([]);
 
   const fetchOrders = async () => {
-    const res = await fetch("http://localhost:5000/orders");
+    const res = await fetch("https://akatsuki-food-backend.vercel.app/api/orders");
     const data = await res.json();
     setOrders(data);
 
