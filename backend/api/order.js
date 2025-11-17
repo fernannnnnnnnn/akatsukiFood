@@ -13,41 +13,36 @@ export default async function handler(req, res) {
   }
 
   try {
-    // FIX BODY PARSE UNTUK VERCEL SERVERLESS
+    // PARSE BODY (WAJIB UNTUK VERCEL SERVERLESS)
     let body = "";
-
     await new Promise((resolve) => {
-      req.on("data", (chunk) => {
-        body += chunk;
-      });
-
+      req.on("data", (chunk) => (body += chunk));
       req.on("end", resolve);
     });
 
-    const data = JSON.parse(body || "{}");
+    const items = JSON.parse(body || "[]");
 
-    const { item, price, toppings, quantity } = data;
-
-    if (!item || !price) {
-      return res.status(400).json({ error: "Bad request: Missing required fields" });
+    // VALIDASI: harus array
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: "Bad request: Items must be a non-empty array" });
     }
+
+    // HITUNG TOTAL
+    const total = items.reduce((sum, item) => sum + (item.price || 0), 0);
 
     const order = {
       id: Date.now(),
-      item,
-      price,
-      toppings: toppings || null,
-      quantity: quantity || 1,
+      items,
+      total,
       time: new Date().toISOString(),
     };
 
     return res.status(200).json({
-      message: "Order berhasil diterima!",
+      message: "Order diterima!",
       order,
     });
-
-  } catch (error) {
-    console.error("Order Error:", error);
+  } catch (err) {
+    console.error("ORDER ERROR:", err);
     return res.status(500).json({ error: "Internal Server Error" });
   }
 }
