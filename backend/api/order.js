@@ -1,39 +1,51 @@
 import fs from "fs";
-
-function safeReadJSON(file) {
-  try {
-    if (!fs.existsSync(file)) return [];
-    const text = fs.readFileSync(file, "utf8").trim();
-    if (!text) return [];
-    return JSON.parse(text);
-  } catch {
-    return [];
-  }
-}
-
-function safeWriteJSON(file, data) {
-  fs.writeFileSync(file, JSON.stringify(data, null, 2), "utf8");
-}
+import path from "path";
 
 export default function handler(req, res) {
-  if (req.method !== "POST") {
-    return res.status(405).json({ message: "Only POST allowed" });
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
   }
 
-  const cart = req.body;
-  const orders = safeReadJSON("orders.json");
+  const file = path.join(process.cwd(), "orders.json");
 
-  const newOrder = {
-    items: cart,
-    time: new Date().toISOString(),
-    total: cart.reduce((sum, item) => sum + item.price, 0),
+  const safeRead = () => {
+    try {
+      if (!fs.existsSync(file)) return [];
+      const text = fs.readFileSync(file, "utf8").trim();
+      if (!text) return [];
+      return JSON.parse(text);
+    } catch {
+      return [];
+    }
   };
 
-  orders.push(newOrder);
-  safeWriteJSON("orders.json", orders);
+  const safeWrite = (data) => {
+    fs.writeFileSync(file, JSON.stringify(data, null, 2), "utf8");
+  };
 
-  return res.status(200).json({
-    message: "Order received",
-    order: newOrder,
-  });
+  if (req.method === "POST") {
+    const cart = req.body;
+
+    const orders = safeRead();
+
+    const newOrder = {
+      items: cart,
+      time: new Date().toISOString(),
+      total: cart.reduce((sum, x) => sum + x.price, 0),
+    };
+
+    orders.push(newOrder);
+    safeWrite(orders);
+
+    return res.status(200).json({
+      message: "Order received",
+      order: newOrder,
+    });
+  }
+
+  return res.status(405).json({ error: "Method not allowed" });
 }

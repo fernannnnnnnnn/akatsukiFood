@@ -1,17 +1,27 @@
 import fs from "fs";
-
-function safeReadJSON(file) {
-  try {
-    if (!fs.existsSync(file)) return [];
-    const text = fs.readFileSync(file, "utf8").trim();
-    if (!text) return [];
-    return JSON.parse(text);
-  } catch {
-    return [];
-  }
-}
+import path from "path";
 
 export default function handler(req, res) {
-  const orders = safeReadJSON("orders.json");
-  res.status(200).json(orders);
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
+  const file = path.join(process.cwd(), "orders.json");
+
+  try {
+    if (!fs.existsSync(file)) {
+      return res.json([]);
+    }
+
+    const text = fs.readFileSync(file, "utf8").trim();
+    const data = text ? JSON.parse(text) : [];
+
+    return res.json(data);
+  } catch (err) {
+    return res.status(500).json({ error: "Failed to read file" });
+  }
 }

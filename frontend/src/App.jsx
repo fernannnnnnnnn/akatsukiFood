@@ -7,6 +7,7 @@ import posterImage from "./assets/poster.png";
 function HomePage() {
   const [cart, setCart] = useState([]);
   const [selectedExtra, setSelectedExtra] = useState(null);
+  const BASE_URL = "https://akatsuki-food-backend.vercel.app/api";
 
   const [qrisModal, setQrisModal] = useState({
     show: false,
@@ -97,7 +98,7 @@ function HomePage() {
 
   const sendOrderAndShowQRIS = async () => {
     try {
-      const res = await fetch("https://akatsuki-food-backend.vercel.app/api/order", {
+      const res = await fetch(`${BASE_URL}/order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(cart),
@@ -134,7 +135,7 @@ function HomePage() {
     };
 
     try {
-      const res = await fetch("https://akatsuki-food-backend.vercel.app/api/order", {
+      const res = await fetch(`${BASE_URL}/order`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify([item]), // kirim sebagai array 1 item
