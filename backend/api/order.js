@@ -26,7 +26,7 @@ export default function handler(req, res) {
   const newOrder = {
     items: cart,
     time: new Date().toISOString(),
-    total: cart.reduce((acc, item) => acc + item.price, 0),
+    total: cart.reduce((sum, item) => sum + item.price, 0),
   };
 
   orders.push(newOrder);
