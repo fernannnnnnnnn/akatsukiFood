@@ -2,9 +2,7 @@
 // MENGGUNAKAN 'kv' (REDIS), BUKAN 'ec' (EDGE CONFIG)
 import { kv } from '@vercel/kv';
 
-export const config = {
-  runtime: 'edge',
-};
+// BARIS 'config' SUDAH DIHAPUS. Ini akan menggunakan runtime default (Node.js).
 
 export default async function handler(req) {
   const headers = {
@@ -14,7 +12,9 @@ export default async function handler(req) {
     'Content-Type': 'application/json',
   };
 
+  // Preflight request
   if (req.method === 'OPTIONS') {
+    // Di runtime Node.js, lebih baik mengirim respons seperti ini
     return new Response(null, { status: 200, headers });
   }
 
