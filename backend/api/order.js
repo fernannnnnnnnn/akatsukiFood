@@ -1,4 +1,5 @@
-import { ec } from '@vercel/edge-config';
+// File: api/order.js
+import { ec } from '../lib/edgeConfig'; // <-- PERUBAHAN DI SINI
 
 export const config = {
   runtime: 'edge',
@@ -17,6 +18,11 @@ export default async function handler(req) {
 
   if (req.method === 'POST') {
     try {
+      // Pastikan 'ec' ada sebelum digunakan (tes keamanan tambahan)
+      if (!ec) {
+        throw new Error("Edge Config client is not initialized.");
+      }
+
       const items = await req.json();
       if (!Array.isArray(items) || items.length === 0) {
         return new Response(JSON.stringify({ error: 'Items must be non-empty array' }), {
@@ -25,12 +31,10 @@ export default async function handler(req) {
         });
       }
 
-      // === PERBAIKAN DI SINI ===
-      // 1. Ambil data
+      // Ambil data
       const ordersData = await ec.get('orders');
-      // 2. Pastikan itu adalah array
+      // Pastikan itu adalah array
       const orders = Array.isArray(ordersData) ? ordersData : [];
-      // === SELESAI ===
 
       const newOrder = {
         id: Date.now(),
@@ -48,8 +52,8 @@ export default async function handler(req) {
       });
 
     } catch (err) {
-      console.error("EDGE ORDER ERROR:", err.message); // Gunakan err.message untuk log yg lebih bersih
-      return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
+      console.error("EDGE ORDER ERROR:", err.message);
+      return new Response(JSON.stringify({ error: 'Internal Server Error', details: err.message }), {
         status: 500,
         headers: { ...headers, 'Content-Type': 'application/json' },
       });
