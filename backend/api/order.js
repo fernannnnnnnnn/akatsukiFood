@@ -1,24 +1,35 @@
 import { ec } from '../edgeConfig';
 
-export default async function handler(req, res) {
-  // === CORS ===
-  res.setHeader("Access-Control-Allow-Origin", "https://akatsuki-food-frontend.vercel.app");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+export const config = {
+  runtime: 'edge',
+};
 
-  // === Handle preflight ===
-  if (req.method === "OPTIONS") {
-    return res.status(200).end();
+export default async function handler(req) {
+  const headers = {
+    'Access-Control-Allow-Origin': 'https://akatsuki-food-frontend.vercel.app',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
+
+  // Preflight
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { status: 200, headers });
   }
 
-  if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method not allowed" });
+  if (req.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers,
+    });
   }
 
   try {
-    const items = req.body;
+    const items = await req.json(); // parse JSON body
     if (!Array.isArray(items) || items.length === 0) {
-      return res.status(400).json({ error: 'Items must be non-empty array' });
+      return new Response(JSON.stringify({ error: 'Items must be non-empty array' }), {
+        status: 400,
+        headers,
+      });
     }
 
     const orders = (await ec.get('orders')) || [];
@@ -33,9 +44,15 @@ export default async function handler(req, res) {
     orders.push(newOrder);
     await ec.set('orders', orders);
 
-    return res.status(200).json({ message: 'Order diterima', order: newOrder });
+    return new Response(JSON.stringify({ message: 'Order diterima', order: newOrder }), {
+      status: 200,
+      headers,
+    });
   } catch (err) {
     console.error("EDGE ORDER ERROR:", err);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
+      status: 500,
+      headers,
+    });
   }
 }

@@ -1,15 +1,35 @@
 import { ec } from '../edgeConfig';
 
-export default async function handler(req, res) {
+export const config = {
+  runtime: 'edge',
+};
+
+export default async function handler(req) {
+  const headers = {
+    'Access-Control-Allow-Origin': 'https://akatsuki-food-frontend.vercel.app',
+    'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+  };
+
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { status: 200, headers });
+  }
+
   if (req.method !== 'GET') {
-    return res.status(405).json({ error: 'Method not allowed' });
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers,
+    });
   }
 
   try {
     const orders = (await ec.get('orders')) || [];
-    return res.status(200).json(orders);
+    return new Response(JSON.stringify(orders), { status: 200, headers });
   } catch (err) {
     console.error(err);
-    return res.status(500).json({ error: 'Internal Server Error' });
+    return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
+      status: 500,
+      headers,
+    });
   }
 }
