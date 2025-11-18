@@ -1,4 +1,4 @@
-import { ec } from '../edgeConfig';
+import { ec } from '@vercel/edge-config'; // <-- GUNAKAN BARIS INI
 
 export const config = {
   runtime: 'edge',
